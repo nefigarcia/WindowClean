@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { FormData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,7 @@ import { Step4Schedule } from '@/components/steps/Step4Schedule';
 import { Step5UserInfo } from '@/components/steps/Step5UserInfo';
 import { Step6Confirmation } from '@/components/steps/Step6Confirmation';
 import { Step7Negotiation } from '@/components/steps/Step7Negotiation';
-import { ChevronLeft, ChevronRight, Check, XIcon as X, Send } from 'lucide-react'; // Renamed X to XIcon
+import { ChevronLeft, ChevronRight, Check, XIcon as X, Send } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -25,29 +26,11 @@ export default function WindowCleanPage() {
   const [generatedPrice, setGeneratedPrice] = useState<number | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (currentUiStep === 3 && formData.windows && formData.serviceType && generatedPrice === null) {
-      // Simple price calculation logic based on selections
-      let basePrice = 50;
-      if (formData.windows === '6-10') basePrice *= 1.5;
-      if (formData.windows === '11-20') basePrice *= 2.5;
-
-      if (formData.serviceType === 'Exterior') basePrice *= 1.2;
-      if (formData.serviceType === 'Interior & Exterior') basePrice *= 2;
-      
-      const randomFactor = Math.random() * 0.4 + 0.8; // +/- 20%
-      const finalPrice = Math.max(25, Math.round(basePrice * randomFactor)); // Minimum price $25
-
-      setGeneratedPrice(finalPrice);
-      updateFormData('price', finalPrice);
-    }
-  }, [currentUiStep, formData.windows, formData.serviceType, generatedPrice]);
-
-  const updateFormData = (field: keyof FormData, value: any) => {
+  const updateFormData = useCallback((field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleNextStep = () => {
+  const handleNextStep = useCallback(() => {
     if (currentUiStep === 1 && !formData.windows) {
       toast({ title: "Selection Required", description: "Please select the number of windows.", variant: "destructive" });
       return;
@@ -65,7 +48,6 @@ export default function WindowCleanPage() {
       return;
     }
 
-
     switch (currentUiStep) {
       case 1: // From Windows to Service Type
         setCurrentUiStep(2);
@@ -82,14 +64,49 @@ export default function WindowCleanPage() {
       case 5: // From User Info to Confirmation
         setCurrentUiStep(6);
         setProgressStep(6);
-        // Here you would typically send data to a backend
         console.log("Booking Submitted:", formData);
         toast({ title: "Booking Submitted!", description: "Your request has been received." });
         break;
     }
-  };
+  }, [currentUiStep, formData, toast]);
 
-  const handlePreviousStep = () => {
+  useEffect(() => {
+    if (currentUiStep === 1 && formData.windows) {
+      const timer = setTimeout(() => {
+        handleNextStep();
+      }, 300); // Delay for smoother UI transition
+      return () => clearTimeout(timer);
+    }
+  }, [formData.windows, currentUiStep, handleNextStep]);
+
+  useEffect(() => {
+    if (currentUiStep === 2 && formData.serviceType) {
+      const timer = setTimeout(() => {
+        handleNextStep();
+      }, 300); // Delay for smoother UI transition
+      return () => clearTimeout(timer);
+    }
+  }, [formData.serviceType, currentUiStep, handleNextStep]);
+  
+  useEffect(() => {
+    if (currentUiStep === 3 && formData.windows && formData.serviceType && generatedPrice === null) {
+      let basePrice = 50;
+      if (formData.windows === '6-10') basePrice *= 1.5;
+      if (formData.windows === '11-20') basePrice *= 2.5;
+
+      if (formData.serviceType === 'Exterior') basePrice *= 1.2;
+      if (formData.serviceType === 'Interior & Exterior') basePrice *= 2;
+      
+      const randomFactor = Math.random() * 0.4 + 0.8; 
+      const finalPrice = Math.max(25, Math.round(basePrice * randomFactor)); 
+
+      setGeneratedPrice(finalPrice);
+      updateFormData('price', finalPrice);
+    }
+  }, [currentUiStep, formData.windows, formData.serviceType, generatedPrice, updateFormData]);
+
+
+  const handlePreviousStep = useCallback(() => {
     switch (currentUiStep) {
       case 2: // From Service Type back to Windows
         setCurrentUiStep(1);
@@ -100,8 +117,8 @@ export default function WindowCleanPage() {
         setProgressStep(2);
         setGeneratedPrice(null); // Recalculate price if they go back
         break;
-      case 4: // From Schedule back to Price Quote (or service type if they want to change affecting price)
-        setCurrentUiStep(3); // Go back to quote, price is preserved unless they go further back
+      case 4: // From Schedule back to Price Quote
+        setCurrentUiStep(3); 
         setProgressStep(3);
         break;
       case 5: // From User Info back to Schedule
@@ -109,7 +126,7 @@ export default function WindowCleanPage() {
         setProgressStep(4);
         break;
     }
-  };
+  }, [currentUiStep]);
   
   const handlePriceDecision = (accepted: boolean) => {
     updateFormData('acceptPrice', accepted);
@@ -118,7 +135,7 @@ export default function WindowCleanPage() {
       setProgressStep(4);
     } else {
       setCurrentUiStep(7); // Go to Negotiation
-      setProgressStep(TOTAL_PROGRESS_STAGES); // Mark as complete for this path
+      setProgressStep(TOTAL_PROGRESS_STAGES); 
     }
   };
 
@@ -182,12 +199,12 @@ export default function WindowCleanPage() {
                 <ChevronLeft className="mr-2 h-4 w-4" /> Back
               </Button>
             )}
-            {currentUiStep === 3 && ( // Special Back for Quote, goes to Step 2
+            {currentUiStep === 3 && ( 
                <Button variant="outline" onClick={handlePreviousStep} className="font-medium">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Back
               </Button>
             )}
-            {currentUiStep === 1 || currentUiStep === 2 || currentUiStep === 4 ? (
+            {currentUiStep === 4 ? ( // Only show Next button for step 4
               <Button onClick={handleNextStep} variant="default" className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium">
                 Next <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
