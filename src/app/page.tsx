@@ -40,7 +40,7 @@ export default function WindowCleanPage() {
       return;
     }
     if (currentUiStep === 4 && !formData.scheduleDate) {
-      toast({ title: "Selection Required", description: "Please select a date for your service.", variant: "destructive" });
+      toast({ title: "Selection Required", description: "Please select a date and time for your service.", variant: "destructive" });
       return;
     }
      if (currentUiStep === 5 && (!formData.email || !/\S+@\S+\.\S+/.test(formData.email))) {
