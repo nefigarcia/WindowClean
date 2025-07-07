@@ -110,7 +110,8 @@ export function Step4Schedule({ formData, onSelectDate }: Step4ScheduleProps) {
                 {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            {!selectedDate && (
+              <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -119,6 +120,9 @@ export function Step4Schedule({ formData, onSelectDate }: Step4ScheduleProps) {
                 disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1)) } // Disable past dates
               />
             </PopoverContent>
+            )
+            }
+            
           </Popover>
         </div>
 

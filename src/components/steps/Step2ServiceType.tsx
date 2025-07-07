@@ -12,8 +12,8 @@ interface Step2ServiceTypeProps {
 
 const serviceTypeOptions = [
   { id: "type-interior", value: "Interior", label: "Interior Cleaning" },
-  { id: "type-exterior", value: "Exterior Cleaning" },
-  { id: "type-both", value: "Interior & Exterior Cleaning" },
+  { id: "type-exterior", value: "Exterior", label: "Exterior Cleaning" },
+  { id: "type-both", value: "Interior & Exterior", label: "Interior & Exterior Cleaning" },
 ] as const;
 
 export function Step2ServiceType({ formData, onSelectServiceType }: Step2ServiceTypeProps) {

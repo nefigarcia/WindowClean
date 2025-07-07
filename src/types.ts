@@ -5,4 +5,5 @@ export interface FormData {
   acceptPrice?: boolean;
   scheduleDate?: Date;
   email?: string;
+  phone: string;
 }
