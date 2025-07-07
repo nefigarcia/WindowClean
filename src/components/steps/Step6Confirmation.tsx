@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { CheckCircle2 } from "lucide-react";
 
-export function Step6Confirmation() {
+export function Step6Confirmation({formData}: { formData: { email: string; phone: string } }) {
   return (
     <div className="space-y-6 text-center">
       <div className="flex justify-center">
@@ -11,11 +11,11 @@ export function Step6Confirmation() {
       </div>
       <h2 className="text-2xl font-semibold font-headline">Thank You for Requesting Your Service!</h2>
       <p className="text-lg text-muted-foreground">
-        An agent will reach out to you shortly to complete the service details and confirm your booking.
+        An agent will reach out to you shortly at <strong>{formData.email}</strong> or <strong>{formData.phone}</strong> to complete the service details and confirm your booking.
       </p>
       <div className="flex justify-center">
-        <Image
-          src="https://placehold.co/300x200.png"
+        <img
+          src="/images/monkeywindow.png" // Adjust the path as needed
           alt="Clean windows"
           width={300}
           height={200}

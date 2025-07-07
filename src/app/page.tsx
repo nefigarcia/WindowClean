@@ -22,13 +22,25 @@ const TOTAL_PROGRESS_STAGES = 6; // 1.Windows, 2.Service, 3.Quote, 4.Schedule, 5
 export default function WindowCleanPage() {
   const [currentUiStep, setCurrentUiStep] = useState(1);
   const [progressStep, setProgressStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({ email: ''});
+  const [formData, setFormData] = useState<FormData>({ email: '', phone:''});
   const [generatedPrice, setGeneratedPrice] = useState<number | null>(null);
   const { toast } = useToast();
-
+  const apiEnv= process.env.NEXT_PUBLIC_API_URL;
   const updateFormData = useCallback((field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
+
+  const handleSubmitBooking = async () => {
+    const bookingData = formData;
+    try {
+      const response = await fetch(apiEnv+`/Regmonkey`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+      // Handle the response as needed (e.g., show a success message, navigate to the next step)
+    } catch (error) {}
+  };
 
   const handleNextStep = useCallback(() => {
     if (currentUiStep === 1 && !formData.windows) {
@@ -47,6 +59,14 @@ export default function WindowCleanPage() {
       toast({ title: "Validation Error", description: "Please enter a valid email address.", variant: "destructive" });
       return;
     }
+     if (currentUiStep === 5 && (!formData.phone || !/^\d{10}$/.test(formData.phone))) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid 10-digit phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     switch (currentUiStep) {
       case 1: // From Windows to Service Type
@@ -62,6 +82,7 @@ export default function WindowCleanPage() {
         setProgressStep(5);
         break;
       case 5: // From User Info to Confirmation
+        handleSubmitBooking();
         setCurrentUiStep(6);
         setProgressStep(6);
         console.log("Booking Submitted:", formData);
@@ -90,15 +111,14 @@ export default function WindowCleanPage() {
   
   useEffect(() => {
     if (currentUiStep === 3 && formData.windows && formData.serviceType && generatedPrice === null) {
-      let basePrice = 50;
-      if (formData.windows === '6-10') basePrice *= 1.5;
-      if (formData.windows === '11-20') basePrice *= 2.5;
+      let basePrice = 100;
+      if (formData.windows === '6-10') basePrice += 50;
+      if (formData.windows === '11-20') basePrice += 100;
 
-      if (formData.serviceType === 'Exterior') basePrice *= 1.2;
+      if (formData.serviceType === 'Exterior') basePrice *= 1;
       if (formData.serviceType === 'Interior & Exterior') basePrice *= 2;
       
-      const randomFactor = Math.random() * 0.4 + 0.8; 
-      const finalPrice = Math.max(25, Math.round(basePrice * randomFactor)); 
+      const finalPrice = basePrice; 
 
       setGeneratedPrice(finalPrice);
       updateFormData('price', finalPrice);
@@ -162,9 +182,14 @@ export default function WindowCleanPage() {
       case 4:
         return <Step4Schedule formData={formData} onSelectDate={(date) => updateFormData('scheduleDate', date)} />;
       case 5:
-        return <Step5UserInfo email={formData.email || ''} onEmailChange={(val) => updateFormData('email', val)} />;
+        return <Step5UserInfo 
+        email={formData.email || ''}
+        phone={formData.phone || ''}
+        onEmailChange={(val) => updateFormData('email', val)}
+        onPhoneChange={(val) => updateFormData('phone', val)} 
+        />;
       case 6:
-        return <Step6Confirmation />;
+        return <Step6Confirmation formData={{ email: formData.email || '', phone: formData.phone || '' }} />;
       case 7:
         return <Step7Negotiation />;
       default:
@@ -212,10 +237,10 @@ export default function WindowCleanPage() {
             {currentUiStep === 3 && (
               <div className="flex gap-4 w-full justify-center">
                 <Button onClick={() => handlePriceDecision(false)} variant="destructive" className="font-medium flex-1 sm:flex-none">
-                  <X className="mr-2 h-4 w-4" /> No, need a better price
+                  <X className="mr-2 h-4 w-4" /> 
                 </Button>
                 <Button onClick={() => handlePriceDecision(true)} variant="default" className="bg-green-600 hover:bg-green-700 text-white font-medium flex-1 sm:flex-none">
-                  <Check className="mr-2 h-4 w-4" /> Yes, Book Now
+                  <Check className="mr-2 h-4 w-4" /> 
                 </Button>
               </div>
             )}
@@ -225,7 +250,7 @@ export default function WindowCleanPage() {
               </Button>
             )}
              {currentUiStep === 6 || currentUiStep === 7 ? (
-              <Button onClick={() => { setCurrentUiStep(1); setProgressStep(1); setFormData({email: ''}); setGeneratedPrice(null); }} variant="outline" className="font-medium w-full">
+              <Button onClick={() => { setCurrentUiStep(1); setProgressStep(1); setFormData({email: '', phone: ''}); setGeneratedPrice(null); }} variant="outline" className="font-medium w-full">
                 Start New Booking
               </Button>
             ) : null}

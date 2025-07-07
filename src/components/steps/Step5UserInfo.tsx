@@ -9,34 +9,14 @@ import { Button } from "@/components/ui/button";
 
 interface Step5UserInfoProps {
   email: string;
+  phone: string; // Assuming phone is also needed for future use
   onEmailChange: (email: string) => void;
+  onPhoneChange: (phone: string) => void; // Optional for future use
 }
 
-export function Step5UserInfo({ email, onEmailChange }: Step5UserInfoProps) {
+export function Step5UserInfo({ email, phone, onEmailChange, onPhoneChange }: Step5UserInfoProps) {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onEmailChange(event.target.value);
-  };
-
-  // Placeholder function to collect all parameters
-  const collectAllParameters = () => {
-    // In a real application, you would collect data from all previous steps
-    // and return an object with all the booking details.
-    return {
-      email: email,
-      // ... other parameters from previous steps
-    };
-  };
-
-  const handleSubmitBooking = async () => {
-    const bookingData = collectAllParameters();
-    try {
-      const response = await fetch("https://data.com/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
-      });
-      // Handle the response as needed (e.g., show a success message, navigate to the next step)
-    } catch (error) {}
   };
   
   return (
@@ -55,6 +35,17 @@ export function Step5UserInfo({ email, onEmailChange }: Step5UserInfoProps) {
           value={email}
           onChange={handleInputChange}
           required 
+        />
+      </div>
+      <div>
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          type="tel"
+          value={phone}
+          onChange={(e) => onPhoneChange(e.target.value)}
+          placeholder="Enter your phone number"
+          className="mt-1"
         />
       </div>
     </div>

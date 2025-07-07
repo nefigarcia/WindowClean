@@ -14,11 +14,11 @@ export function Step7Negotiation() {
         We understand that pricing is important. We might be able to work out a better price for you.
       </p>
       <p className="text-lg text-muted-foreground">
-        Please contact us at <a href="mailto:nnn@hotmail.com" className="text-accent font-semibold hover:underline">nnn@hotmail.com</a> to discuss your needs.
+        Please contact us at <a href="mailto:windowclean@monkeyshine.rosystems.net" className="text-accent font-semibold hover:underline">windowclean@monkeyshine.rosystems.net</a> to discuss your needs.
       </p>
       <div className="flex justify-center">
-        <Image
-          src="https://placehold.co/300x200.png"
+        <img
+          src="/images/monkeywindow.png"
           alt="Negotiation"
           width={300}
           height={200}
